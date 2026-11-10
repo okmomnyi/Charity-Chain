@@ -1,0 +1,14 @@
+{
+  "name": "charitychain-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CharityChain notary smart contracts and shared tooling.",
+  "scripts": {
+    "vectors": "node scripts/gen-vectors.mjs",
+    "export-abis": "node scripts/export-abis.mjs"
+  },
+  "devDependencies": {
+    "ethers": "^6.13.0"
+  }
+}

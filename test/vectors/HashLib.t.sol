@@ -2,7 +2,7 @@
 pragma solidity 0.8.24;
 
 import { Test } from "forge-std/Test.sol";
-import { HashLib } from "../../src/libraries/HashLib.sol";
+import { HashLib } from "../../contracts/libraries/HashLib.sol";
 contract HashLibHarness {
     function getId(
         string memory kind,
@@ -18,20 +18,8 @@ contract HashLibTest is Test {
         assert(result == 0xc6c7eae886c7a49306015a5d23f82efc9b95323141a50401017019e5bbd7b734);
     }
 
-    function test_HashDonationGoldenVector() public pure {
-        bytes32 result = HashLib.hashDonation(
-            0x1111111111111111111111111111111111111111111111111111111111111111,
-            0x2222222222222222222222222222222222222222222222222222222222222222,
-            0x3333333333333333333333333333333333333333333333333333333333333333,
-            50000,
-            bytes3("KES"),
-            0,
-            1728894190,
-            bytes32(0)
-        );
-
-        assert(result == 0x99c0f01d1fe499a124d122d6f25dda85826509f5b3123ff065ab9681dd4243da);
-    }
+    // Donation hashing is pinned to the TS golden vectors in Vectors.t.sol
+    // (shared/vectors/donations.json) and exercised in DonationLedger.t.sol.
 
     function test_EmptyDayRootGoldenVector() public pure {
         bytes32 result = HashLib.emptyDayRoot(20261102);
@@ -58,17 +46,12 @@ contract HashLibTest is Test {
     }
 
     function test_IdOfRejectsUppercaseUUID() public {
-    HashLibHarness harness = new HashLibHarness();
+        HashLibHarness harness = new HashLibHarness();
 
-    vm.expectRevert(
-        abi.encodeWithSignature(
-            "Error(string)",
-            "HashLib: UUID must use lowercase hex"
-        )
-    );
+        vm.expectRevert(
+            abi.encodeWithSignature("Error(string)", "HashLib: UUID must use lowercase hex")
+        );
 
-    harness.getId(
-        "donation",
-        "D1A2B3C4-0000-0000-0000-000000000001"
-    );
+        harness.getId("donation", "D1A2B3C4-0000-0000-0000-000000000001");
+    }
 }

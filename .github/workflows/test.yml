@@ -28,6 +28,17 @@ jobs:
       - name: Show Forge version
         run: forge --version
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install JS deps
+        run: npm install --no-save ethers@^6.13.0
+
+      - name: Generate golden vectors
+        run: node scripts/gen-vectors.mjs
+
       - name: Run Forge fmt
         run: forge fmt --check
 

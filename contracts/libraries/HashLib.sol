@@ -1,11 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+import {IDonationLedger} from "../interfaces/IDonationLedger.sol";
+
 /// @title HashLib
 /// @notice Canonical hashing functions for CharityChain.
 /// @dev All encoding and field ordering must match the backend specification.
+///      `hashDonation` is pinned to the TypeScript side via the golden vectors in
+///      `scripts/gen-vectors.mjs` / `shared/vectors/donations.json`.
 library HashLib {
-    bytes32 internal constant DOMAIN_DONATION_V1 = keccak256("malkia:v1:donation");
+    /// @dev keccak256 of the donation type string. Field order and types must match
+    ///      `IDonationLedger.Donation` and `scripts/gen-vectors.mjs` exactly.
+    bytes32 internal constant DONATION_TYPEHASH = keccak256(
+        "Donation(bytes32 donationId,bytes32 donorRef,uint64 amountMinor,bytes32 currency,uint64 receivedAt,bytes32 metadataHash,bytes32 correctsId)"
+    );
 
     bytes32 internal constant DOMAIN_CASE_V1 = keccak256("malkia:v1:case");
 
@@ -26,29 +34,24 @@ library HashLib {
         return keccak256(abi.encodePacked("malkia:v1:", kind, ":", uuid));
     }
 
-    /// @notice Calculates the canonical donation hash.
-    /// @dev Field order and types must not be changed.
-    function hashDonation(
-        bytes32 donationId,
-        bytes32 sourceRefHash,
-        bytes32 donorRef,
-        uint64 amountMinor,
-        bytes3 currency,
-        uint8 channel,
-        uint64 recordedAt,
-        bytes32 evidenceHash
-    ) internal pure returns (bytes32) {
+    /// @notice Calculates the canonical donation record hash over `donationId` and the
+    ///         `Donation` struct. Mirrors the TypeScript `hashDonation`; field order and
+    ///         types must not be changed without regenerating the golden vectors.
+    function hashDonation(bytes32 donationId, IDonationLedger.Donation memory d)
+        internal
+        pure
+        returns (bytes32)
+    {
         return keccak256(
             abi.encode(
-                DOMAIN_DONATION_V1,
+                DONATION_TYPEHASH,
                 donationId,
-                sourceRefHash,
-                donorRef,
-                amountMinor,
-                currency,
-                channel,
-                recordedAt,
-                evidenceHash
+                d.donorRef,
+                d.amountMinor,
+                d.currency,
+                d.receivedAt,
+                d.metadataHash,
+                d.correctsId
             )
         );
     }
